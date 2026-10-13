@@ -1,0 +1,2 @@
+# Step 1 only uses the Python standard library (sqlite3).
+# Later steps will add: fastapi, uvicorn, httpx, python-dotenv
