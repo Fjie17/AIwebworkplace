@@ -6,7 +6,7 @@ from typing import Iterable, List, Optional
 
 from app.models import TrendingRepo
 
-# Project root: .../workplace1
+# Project root: .../workplace
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "data"
 DEFAULT_DB_PATH = DATA_DIR / "workbench.db"
