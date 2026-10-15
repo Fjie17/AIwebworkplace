@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChatGPT 链路监控</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <header class="top">
+      <div>
+        <h1 class="brand">ChatGPT 链路监控</h1>
+        <p class="sub">实时探测代理出口与 OpenAI 延迟，并给出可操作建议</p>
+      </div>
+      <div class="controls">
+        <span id="live" class="live"><span class="dot"></span>SSE 未连接</span>
+        <button id="btnProbe" class="primary" type="button">立即探测</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="panel span-4 overall" id="overallPanel">
+        <h2>总体状态</h2>
+        <div class="state" id="overallState">—</div>
+        <div class="meta" id="overallMeta"></div>
+      </section>
+
+      <section class="panel span-8">
+        <h2>当前探测</h2>
+        <div id="metrics"></div>
+      </section>
+
+      <section class="panel span-8">
+        <h2>延迟趋势（ms）</h2>
+        <div class="chart-wrap">
+          <canvas id="latencyChart"></canvas>
+        </div>
+      </section>
+
+      <section class="panel span-4">
+        <h2>操作建议</h2>
+        <ul class="advice-list" id="advice"></ul>
+      </section>
+
+      <section class="panel span-6">
+        <h2>成功率摘要</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>目标</th>
+              <th>成功率</th>
+              <th>平均</th>
+              <th>最大</th>
+            </tr>
+          </thead>
+          <tbody id="summaryBody"></tbody>
+        </table>
+      </section>
+
+      <section class="panel span-6">
+        <h2>代理与出口</h2>
+        <div class="meta" id="proxyMeta" style="font-size: 0.95rem; line-height: 1.7"></div>
+      </section>
+    </main>
+
+    <p class="footer">
+      本地服务 · 127.0.0.1:8765 · 探测走系统代理 · 每 5 秒刷新
+    </p>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
