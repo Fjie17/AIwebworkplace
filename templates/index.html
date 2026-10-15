@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GitHub 热门工作台</title>
+  <style>
+    :root {
+      --bg: #f6f4ef;
+      --ink: #1c1b19;
+      --muted: #5c574e;
+      --line: #d9d3c7;
+      --card: #fffdf8;
+      --accent: #0b6e4f;
+      --link: #0b4f8a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(ellipse at top left, #e8f0ea 0%, transparent 45%),
+        linear-gradient(180deg, #f6f4ef 0%, #efe9de 100%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+    header h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.75rem;
+      letter-spacing: -0.02em;
+    }
+    header p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin: 1.5rem 0 1.25rem;
+    }
+    label { color: var(--muted); font-size: 0.9rem; }
+    select {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 8px;
+      padding: 0.45rem 0.7rem;
+      font-size: 0.95rem;
+    }
+    .meta { color: var(--muted); font-size: 0.85rem; }
+    .meta a { color: var(--link); }
+    .list { display: grid; gap: 0.9rem; }
+    article {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      align-items: baseline;
+      margin-bottom: 0.45rem;
+    }
+    .rank {
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 2.2rem;
+    }
+    .name a {
+      color: var(--link);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+    .name a:hover { text-decoration: underline; }
+    .stars { color: var(--muted); font-size: 0.9rem; }
+    .desc {
+      margin: 0.25rem 0 0.55rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .summary {
+      margin: 0;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      font-size: 0.95rem;
+    }
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      padding: 1.5rem;
+      color: var(--muted);
+      background: rgba(255,255,255,0.5);
+    }
+    details { margin-top: 0.65rem; }
+    summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; }
+    pre {
+      margin: 0.5rem 0 0;
+      padding: 0.75rem;
+      background: #f0ebe1;
+      border-radius: 8px;
+      overflow: auto;
+      max-height: 220px;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+    }
+    code {
+      background: #f0ebe1;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>GitHub 热门工作台</h1>
+      <p>每日 Trending Top 10 · 地址 · 中文简介</p>
+    </header>
+
+    <div class="toolbar">
+      <label for="date">日期</label>
+      <form method="get" action="/">
+        <select name="date" id="date" onchange="this.form.submit()">
+          __DATE_OPTIONS__
+        </select>
+      </form>
+      __META__
+    </div>
+
+    __BODY__
+  </div>
+</body>
+</html>

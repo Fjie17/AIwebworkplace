@@ -51,7 +51,7 @@ def init_db(db_path: Path | str = DEFAULT_DB_PATH) -> Path:
 
 
 def upsert_trending(repos: Iterable[TrendingRepo], db_path: Path | str = DEFAULT_DB_PATH) -> int:
-    """Insert or replace a day's board rows. Returns number of rows written."""
+    """Insert or update rows by (date, full_name). Keeps existing README/summary if new empty."""
     rows = list(repos)
     if not rows:
         return 0
@@ -69,8 +69,14 @@ def upsert_trending(repos: Iterable[TrendingRepo], db_path: Path | str = DEFAULT
         url            = excluded.url,
         stars          = excluded.stars,
         github_desc    = excluded.github_desc,
-        readme_excerpt = excluded.readme_excerpt,
-        summary_zh     = excluded.summary_zh,
+        readme_excerpt = CASE
+            WHEN excluded.readme_excerpt != '' THEN excluded.readme_excerpt
+            ELSE trending_repos.readme_excerpt
+        END,
+        summary_zh     = CASE
+            WHEN excluded.summary_zh != '' THEN excluded.summary_zh
+            ELSE trending_repos.summary_zh
+        END,
         fetched_at     = excluded.fetched_at
     """
     with get_connection(db_path) as conn:
@@ -95,6 +101,34 @@ def upsert_trending(repos: Iterable[TrendingRepo], db_path: Path | str = DEFAULT
     return len(rows)
 
 
+def save_day_board(repos: Iterable[TrendingRepo], db_path: Path | str = DEFAULT_DB_PATH) -> int:
+    """
+    Replace one day's board with the given Top N list.
+    Removes same-day repos that fell off the board; preserves README/summary on upsert.
+    """
+    rows = list(repos)
+    if not rows:
+        return 0
+
+    board_date = rows[0].date
+    names = [r.full_name for r in rows]
+
+    with get_connection(db_path) as conn:
+        # Park ranks on -id so UNIQUE(date, rank) cannot clash while reshuffling 1..N
+        conn.execute(
+            "UPDATE trending_repos SET rank = -id WHERE date = ?",
+            (board_date,),
+        )
+        placeholders = ",".join("?" for _ in names)
+        conn.execute(
+            f"DELETE FROM trending_repos WHERE date = ? AND full_name NOT IN ({placeholders})",
+            (board_date, *names),
+        )
+        conn.commit()
+
+    return upsert_trending(rows, db_path=db_path)
+
+
 def list_by_date(date: str, db_path: Path | str = DEFAULT_DB_PATH) -> List[TrendingRepo]:
     with get_connection(db_path) as conn:
         cur = conn.execute(
@@ -115,6 +149,35 @@ def latest_date(db_path: Path | str = DEFAULT_DB_PATH) -> Optional[str]:
         cur = conn.execute("SELECT MAX(date) AS d FROM trending_repos")
         row = cur.fetchone()
         return row["d"] if row and row["d"] else None
+
+
+def list_dates(db_path: Path | str = DEFAULT_DB_PATH) -> List[str]:
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            "SELECT DISTINCT date FROM trending_repos ORDER BY date DESC"
+        )
+        return [row["date"] for row in cur.fetchall()]
+
+
+def update_readme_and_summary(
+    date: str,
+    full_name: str,
+    readme_excerpt: str,
+    summary_zh: str,
+    db_path: Path | str = DEFAULT_DB_PATH,
+) -> None:
+    with get_connection(db_path) as conn:
+        conn.execute(
+            """
+            UPDATE trending_repos
+            SET readme_excerpt = ?,
+                summary_zh = ?,
+                fetched_at = datetime('now', 'localtime')
+            WHERE date = ? AND full_name = ?
+            """,
+            (readme_excerpt, summary_zh, date, full_name),
+        )
+        conn.commit()
 
 
 def _row_to_model(row: sqlite3.Row) -> TrendingRepo:

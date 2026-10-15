@@ -1,2 +1,7 @@
-# Step 1 only uses the Python standard library (sqlite3).
-# Later steps will add: fastapi, uvicorn, httpx, python-dotenv
+# Core jobs use Python stdlib only.
+# Optional helpers:
+python-dotenv>=1.0.0
+
+# Optional: FastAPI stack (stdlib server works without these)
+# fastapi>=0.115.0
+# uvicorn[standard]>=0.30.0

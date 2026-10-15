@@ -1,44 +1,48 @@
 # GitHub 热门工作台
 
-每日自动获取 GitHub Trending Top 10，入库并（后续）用 LLM 从 README 提炼中文简介。
+每日自动获取 GitHub Trending Top 10，入库并用 LLM 从 README 提炼中文简介。
 
-## 第一步：数据库
-
-已完成 SQLite 表 `trending_repos` 与初始化脚本。
-
-### 初始化
+## 密钥
 
 ```bash
-# 建议先建虚拟环境（可选，本步无第三方依赖）
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-
-# 在项目根目录执行
-python -m app.db
+copy .env.example .env
 ```
 
-成功会打印：`SQLite ready: ...\data\workbench.db`
+编辑 `.env`：至少填 `LLM_API_KEY`；推荐填 `GITHUB_TOKEN`。不要把密钥发到聊天或提交 Git。
 
-### 表字段
+## 日常命令
 
-| 字段 | 说明 |
+```bash
+python -m jobs.fetch_trending    # 拉 Top10
+python -m jobs.summarize         # README + 中文摘要
+python -m jobs.peek_db           # 终端查看数据库
+python -m app.web                # 启动 Web 工作台（推荐，无需额外依赖）
+```
+
+浏览器打开：http://127.0.0.1:8000
+
+## 如何查看数据库
+
+数据库文件：`data/workbench.db`
+
+| 方式 | 做法 |
 |------|------|
-| date | 榜单日期 YYYY-MM-DD |
-| rank | 排名 1–10 |
-| full_name | owner/repo |
-| url | 仓库地址 |
-| stars | 星数 |
-| github_desc | GitHub 短描述 |
-| readme_excerpt | README 截断（第二步后） |
-| summary_zh | 中文提炼（第三步后） |
-| fetched_at | 抓取时间 |
+| **Web 页面（推荐）** | `python -m app.web` → 打开 http://127.0.0.1:8000 |
+| **命令行** | `python -m jobs.peek_db` 或加 `--full` / `--date 2026-10-15` |
+| **图形工具** | 用 [DB Browser for SQLite](https://sqlitebrowser.org/) 打开 `data/workbench.db` |
+| **JSON API** | http://127.0.0.1:8000/api/trending |
 
-唯一约束：`(date, rank)`、`(date, full_name)`，同一天可重复跑脚本覆盖更新。
+终端里中文可能乱码（Windows GBK），**以网页或 DB Browser 为准**。
 
-## 后续步骤
+## API
 
-2. 拉取 Trending Top10 入库  
-3. README + LLM 摘要  
-4. FastAPI + 列表页  
-5. 云服务器 cron 部署  
+| 路径 | 说明 |
+|------|------|
+| `GET /` | 列表页 |
+| `GET /api/trending` | `?date=YYYY-MM-DD` 可选 |
+| `GET /api/trending/latest` | 最新一天 |
+| `GET /api/dates` | 已有日期 |
+
+## 后续
+
+5. 云服务器 cron / systemd 部署说明  
